@@ -21,7 +21,7 @@ import constants.Constants;
 
 public class NetworkManager {
     private Context context;
-    private String sUrl = "192.168.0.105:3000/deal";
+    private String sUrl = "192.168.0.105:3000";
     private static NetworkManager sharedInstance = null;
     private NetworkManager() {
         context = null;
@@ -40,7 +40,7 @@ public class NetworkManager {
     public void getCards(CardView cards[], Context context) {
         this.context = context;
         this.cards = cards;
-        new GetUrlContentTask().execute("http://" + sUrl);
+        new GetUrlContentTask().execute("http://" + sUrl + "/deal");
     }
     public void updateCards(String jsonObj) {
         JSONObject object = null;
