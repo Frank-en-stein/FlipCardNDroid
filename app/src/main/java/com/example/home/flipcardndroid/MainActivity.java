@@ -30,12 +30,12 @@ public class MainActivity extends AppCompatActivity {
         NetworkManager.getSharedInstance().getCards(cardViews, MainActivity.this);
     }
 
-    protected void onClickRequestCard(View v) {
+    public void onClickRequestCard(View v) {
         NetworkManager.getSharedInstance().getCards(cardViews, MainActivity.this);
         for (CardView card : cardViews) card.flipBack();
     }
 
-    protected void onClickChangeDealer(View v) {
+    public void onClickChangeDealer(View v) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter dealer ip:");
 
