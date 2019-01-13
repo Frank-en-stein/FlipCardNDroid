@@ -52,7 +52,7 @@ public class CardView {
         if (isShowingFront) flip();
     }
 
-    private void flip() {
+    public void flip() {
         if (!canFlip) return;
         final ObjectAnimator oa1 = ObjectAnimator.ofFloat(imageView, "scaleX", 1f, 0f);
         final ObjectAnimator oa2 = ObjectAnimator.ofFloat(imageView, "scaleX", 0f, 1f);

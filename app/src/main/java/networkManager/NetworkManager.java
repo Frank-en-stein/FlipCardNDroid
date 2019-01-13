@@ -1,11 +1,12 @@
 package networkManager;
 
 import android.content.Context;
+import android.net.wifi.WifiInfo;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.example.home.flipcardndroid.MainActivity;
+import android.net.*;
+import android.net.wifi.WifiManager;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,6 +19,8 @@ import java.net.URL;
 import card.CardView;
 import constants.Constants;
 
+import static java.lang.String.valueOf;
+
 
 public class NetworkManager {
     private Context context;
@@ -27,6 +30,8 @@ public class NetworkManager {
         context = null;
     }
     private CardView cards[];
+    private int gameId = 0;
+    private WifiManager wifii;
     public static NetworkManager getSharedInstance() {
         if (sharedInstance == null) sharedInstance = new NetworkManager();
         return sharedInstance;
@@ -35,12 +40,19 @@ public class NetworkManager {
         this.sUrl = url;
     }
     public String getUrl() {
-        return this.sUrl;
+        wifii= (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        DhcpInfo d=wifii.getDhcpInfo();
+        WifiInfo wInfo = wifii.getConnectionInfo();
+        return intToIp(d.gateway);
     }
     public void getCards(CardView cards[], Context context) {
         this.context = context;
         this.cards = cards;
-        new GetUrlContentTask().execute("http://" + sUrl + "/deal");
+        this.sUrl = getUrl() + ":3000";
+        executeTask();
+    }
+    private void executeTask() {
+        new GetUrlContentTask().execute("http://" + sUrl + "/deal/" + gameId);
     }
     public void updateCards(String jsonObj) {
         JSONObject object = null;
@@ -51,21 +63,33 @@ public class NetworkManager {
                 String card = Constants.cardNames[array.optInt(i)];
                 this.cards[i].setCard(card);
             }
-            this.makeToast("Fetched New Cards");
+            this.gameId = object.getInt("gameId");
+            this.makeToast("Fetched New Cards" + gameId);
+            for (CardView card : cards) card.flipBack();
         }
         catch (Exception e) {
             Log.e("json parse error", e.getMessage());
             try {
-                this.makeToast(object.getString("msg"));
+                String msg = object.getString("msg");
+                if (!msg.toLowerCase().equals("same game")) this.makeToast(msg);
             }
             catch (Exception ex) {
                 Log.e("json parse error", e.getMessage());
                 this.makeToast("Failed to fetch cards");
             }
         }
+        finally {
+            executeTask();
+        }
     }
     private void makeToast(String msg) {
         if (context!= null) Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+    }
+    private String intToIp(int addr) {
+        return  ((addr & 0xFF) + "." +
+                ((addr >>>= 8) & 0xFF) + "." +
+                ((addr >>>= 8) & 0xFF) + "." +
+                ((addr >>>= 8) & 0xFF));
     }
 }
 
